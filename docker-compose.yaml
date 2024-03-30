@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  server:
+    container_name: flask_server
+    build:
+      context: .
+      dockerfile: ./backend.dockerfile
+      target: dev
+    ports:
+      - '5000:5000'
+    depends_on:
+      - postgres_db
+    volumes:
+      - .:/code
+
+  migration:
+    container_name: db_migration
+    build:
+      context: .
+      dockerfile: ./backend.dockerfile
+      target: dev
+    depends_on:
+      - postgres_db
+    volumes:
+      - .:/code
+    environment:
+      FLASK_APP: "backend/app.py"
+    command: flask db migrate
+
+  upgrade:
+    container_name: db_upgrade
+    build:
+      context: .
+      dockerfile: ./backend.dockerfile
+      target: dev
+    depends_on:
+      - postgres_db
+      - migration
+    volumes:
+      - .:/code
+    environment:
+      FLASK_APP: "backend/app.py"
+    command: flask db upgrade
+
+  postgres_db:
+    container_name: sol_postgres
+    image: postgres:13
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hackathon
+    expose:
+      - 5432
+    volumes:
+      - postgres_storage:/var/lib/postgresql/data
+
+volumes:
+  postgres_storage:

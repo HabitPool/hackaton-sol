@@ -1,0 +1,6 @@
+postgres:
+  username: postgres
+  password: postgres
+  host: 8ddcf7468363
+  port: 5432
+  db: hackathon
